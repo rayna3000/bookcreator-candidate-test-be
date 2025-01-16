@@ -26,8 +26,9 @@ We'll use the following rubric to evaluate your submission.
 2. Is the API simple and easy-to-use?
 3. Does the deployed service work as described in the README?
 4. Can I build and run the code locally within seconds or minutes of initial checkout?
-5. Is the code clean, readable and well structured?
-6. Have they thought about testing? (Comprehensive tests are not expected but some consideration of testability would be nice to see).
+5. Did they use Cloud Build to build and deploy to the cloud? (Optional)
+6. Is the code clean, readable and well structured?
+7. Have they thought about testing? (Comprehensive tests are not expected but some consideration of testability would be nice to see.)
 
 ## Are there any restrictions?
 
