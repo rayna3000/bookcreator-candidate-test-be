@@ -1,160 +1,77 @@
-# Cloud Run Template Microservice
+# "Happy for you" or "Sorry that happened" API
+Have you ever been told some news and wondered whether you should react with "Happy for you" or "Sorry that happened"?
 
-A template repository for a Cloud Run microservice, written in Node.js. 
+This API allows you to send a POST request with some news, and it uses the Google Natural Language API to respond with either "Happy for you" or "Sorry that happened".
 
-[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
+See it deployed here: https://raynas-gcp-demo-940535980876.europe-west1.run.app/
 
-## Prerequisite
+This API is inspired by the meme "I ain't reading all that, happy for u tho, or sorry that happened".
 
-* Enable the Cloud Run API via the [console](https://console.cloud.google.com/apis/library/run.googleapis.com?_ga=2.124941642.1555267850.1615248624-203055525.1615245957) or CLI:
+This project was created using Google Cloud Platform's [cloud-run-microservice-template-nodejs](https://github.com/GoogleCloudPlatform/cloud-run-microservice-template-nodejs) template following their guide [Quickstart: Deploy to Cloud Run from a git repository](https://cloud.google.com/run/docs/quickstarts/deploy-continuously).
 
-```bash
-gcloud services enable run.googleapis.com
+## API endpoints
+
+### GET /
+
+Query parameters: none
+
+Response:
+
+```json
+{
+    "message": "Welcome to the \"Happy for you\" or \"Sorry that happened\" API! Feel free to share your happy or sad news using the POST /sharenews endpoint under the JSON property \"news\"."
+}
 ```
 
-## Features
+### POST /sharenews
 
-* **Express**: Web server framework
-* **Buildpack support** Tooling to build production-ready container images from source code and without a Dockerfile
-* **Dockerfile**: Container build instructions, if needed to replace buildpack for custom build
-* **SIGTERM handler**: Catch termination signal for cleanup before Cloud Run stops the container
-* **Service metadata**: Access service metadata, project Id and region, at runtime
-* **Local development utilities**: Auto-restart with changes and prettify logs
-* **Structured logging w/ Log Correlation** JSON formatted logger, parsable by Cloud Logging, with [automatic correlation of container logs to a request log](https://cloud.google.com/run/docs/logging#correlate-logs).
-* **Unit and System tests** Basic unit and system tests setup for the microservice
+Query parameters: none
 
-## Local Development
+Request parameters:
+- `news` - a nonempty string, for example "I missed my bus" or "I won the lottery"
 
-### Cloud Code
+Example request:
+```json
+{
+    "news": "I missed my bus"
+}
+```
 
-This template works with [Cloud Code](https://cloud.google.com/code), an IDE extension
-to let you rapidly iterate, debug, and run code on Kubernetes and Cloud Run.
+Response:
+```json
+{
+    "message": "Sorry that happened!"
+}
+```
 
-Learn how to use Cloud Code for:
+## Local setup instructions
 
-* Local development - [VSCode](https://cloud.google.com/code/docs/vscode/developing-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/developing-a-cloud-run-service)
+To run this repo, you must have a [Google Cloud Platform account on the free tier](https://cloud.google.com/free).
 
-* Local debugging - [VSCode](https://cloud.google.com/code/docs/vscode/debugging-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/debugging-a-cloud-run-service)
+### Installation
 
-* Deploying a Cloud Run service - [VSCode](https://cloud.google.com/code/docs/vscode/deploying-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/deploying-a-cloud-run-service)
-* Creating a new application from a custom template (`.template/templates.json` allows for use as an app template) - [VSCode](https://cloud.google.com/code/docs/vscode/create-app-from-custom-template), [IntelliJ](https://cloud.google.com/code/docs/intellij/create-app-from-custom-template)
+- Clone this repo
+- Install all the dependencies:
+```
+npm i
+```
+- Create a new project with Natural Language API enabled - follow [the Quickstart guide for setting up Natural Language API] up to and including the step:
+```
+gcloud init
+```
+The above should be run within the folder for this project.
+- Then, run the following command in the terminal in order to authenticate your local project with the Natural Language API:
+```
+gcloud auth application-default login
+```
 
-### CLI tooling
+### Running
+To run the local server, simply:
+```
+npm run dev
+```
 
-#### Local development
 
-1. Set Project Id:
-    ```bash
-    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
-    ```
-2. Start the server with hot reload:
-    ```bash
-    npm run dev
-    ```
-
-#### Deploying a Cloud Run service
-
-1. Set Project Id:
-    ```bash
-    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
-    ```
-
-1. Enable the Artifact Registry API:
-    ```bash
-    gcloud services enable artifactregistry.googleapis.com
-    ```
-
-1. Create an Artifact Registry repo:
-    ```bash
-    export REPOSITORY="samples"
-    export REGION=us-central1
-    gcloud artifacts repositories create $REPOSITORY --location $REGION --repository-format "docker"
-    ```
-  
-1. Use the gcloud credential helper to authorize Docker to push to your Artifact Registry:
-    ```bash
-    gcloud auth configure-docker
-    ```
-
-2. Build the container using a buildpack:
-    ```bash
-    npm run build
-    ```
-    
-3. Deploy to Cloud Run:
-    ```bash
-    npm run deploy
-    ```
-
-### Run sample tests
-
-1. [Pass credentials via `GOOGLE_APPLICATION_CREDENTIALS` env var](https://cloud.google.com/docs/authentication/production#passing_variable):
-    ```bash
-    export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
-    ```
-
-2. Set Project Id:
-    ```bash
-    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
-    ```
-3. Run unit tests
-    ```bash
-    npm run test
-    ```
-
-4. Run system tests
-    ```bash
-    gcloud builds submit \
-        --config test/advance.cloudbuild.yaml \
-        --substitutions 'COMMIT_SHA=manual'
-    ```
-    The Cloud Build configuration file will build and deploy the containerized service
-    to Cloud Run, run tests managed by NPM, then clean up testing resources. This configuration restricts public
-    access to the test service. Therefore, service accounts need to have the permission to issue Id tokens for request authorization:
-    * Enable Cloud Run, Cloud Build, Artifact Registry, and IAM APIs:
-        ```bash
-        gcloud services enable run.googleapis.com cloudbuild.googleapis.com iamcredentials.googleapis.com artifactregistry.googleapis.com
-        ```
-
-    * Set environment variables.
-        ```bash
-        export PROJECT_ID="$(gcloud config get-value project)"
-        export PROJECT_NUMBER="$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')"
-        ```
-
-    * Create an Artifact Registry repo (or use another already created repo):
-        ```bash
-        export REPOSITORY="samples"
-        export REGION=us-central1
-        gcloud artifacts repositories create $REPOSITORY --location $REGION --repository-format "docker"
-        ```
-  
-    * Create service account `token-creator` with `Service Account Token Creator` and `Cloud Run Invoker` roles.
-        ```bash
-        gcloud iam service-accounts create token-creator
-
-        gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:token-creator@$PROJECT_ID.iam.gserviceaccount.com" \
-            --role="roles/iam.serviceAccountTokenCreator"
-        gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:token-creator@$PROJECT_ID.iam.gserviceaccount.com" \
-            --role="roles/run.invoker"
-        ```
-
-    * Add `Service Account Token Creator` role to the Cloud Build service account.
-        ```bash
-        gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com" \
-            --role="roles/iam.serviceAccountTokenCreator"
-        ```
-
-## Maintenance & Support
-
-This repo performs basic periodic testing for maintenance. Please use the issue tracker for bug reports, features requests and submitting pull requests.
-
-## Contributions
-
-Please see the [contributing guidelines](CONTRIBUTING.md)
 
 ## License
 
