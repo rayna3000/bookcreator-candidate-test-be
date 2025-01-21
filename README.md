@@ -7,7 +7,7 @@ See it deployed here: https://raynas-gcp-demo-940535980876.europe-west1.run.app/
 
 This API is inspired by the meme "I ain't reading all that, happy for u tho, or sorry that happened".
 
-This project was created using Google Cloud Platform's [cloud-run-microservice-template-nodejs](https://github.com/GoogleCloudPlatform/cloud-run-microservice-template-nodejs) template following their guide [Quickstart: Deploy to Cloud Run from a git repository](https://cloud.google.com/run/docs/quickstarts/deploy-continuously).
+This project was created using Google Cloud Platform's [cloud-run-microservice-template-nodejs](https://github.com/GoogleCloudPlatform/cloud-run-microservice-template-nodejs) template following their guide [Quickstart: Deploy to Cloud Run from a git repository](https://cloud.google.com/run/docs/quickstarts/deploy-continuously), in order to continuously deploy on every push to the main branch.
 
 ## API endpoints
 
