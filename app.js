@@ -15,11 +15,14 @@
 import express from 'express';
 import * as language from '@google-cloud/language';
 import {pinoHttp, logger} from './utils/logging.js';
+import {validateShareNewsRequest} from './validation.js';
+import {generateReactionToNews} from './generateReactionToNews.js';
 
 const app = express();
 
 // Use request-based logger for log correlation
 app.use(pinoHttp);
+app.use(express.json());
 
 // Example endpoint
 app.get('/', async (req, res) => {
@@ -52,5 +55,29 @@ app.get('/', async (req, res) => {
 
   res.send(sentiment);
 });
+
+app.post('/sharenews', async (req, res) => {
+  try {
+    validateShareNewsRequest(req);
+  } catch (e) {
+    res.statusCode = 400;
+    res.send({
+      message: e.message
+    })
+  }
+  const client = new language.LanguageServiceClient();
+  const newsToReactTo = req.body.news;
+  try {
+    const reaction = await generateReactionToNews(newsToReactTo, client);
+    res.send({
+      message: reaction
+    })
+  } catch (e) {
+    res.statusCode = 500;
+    res.send({
+      message: 'Something went wrong while trying to generate a reaction to your news'
+    })
+  }
+})
 
 export default app;
