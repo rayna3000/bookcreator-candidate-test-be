@@ -28,7 +28,9 @@ describe('Unit Tests', () => {
     await request.get('/').expect(200);
   });
 
-  it('should respond NOT FOUND to POST /', async () => {
-    await request.post('/').expect(404);
+  it('should return validation error if POST /sharenews news field is empty string', async () => {
+    await request.post('/sharenews', {
+      message: ''
+    }).expect(400);
   });
 });
