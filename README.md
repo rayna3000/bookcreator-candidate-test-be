@@ -71,7 +71,11 @@ To run the local server, simply:
 npm run dev
 ```
 
-
+### Testing
+To run the unit tests, simply:
+```
+npm run test
+```
 
 ## License
 
