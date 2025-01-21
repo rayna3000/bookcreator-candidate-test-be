@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import express from 'express';
+import * as language from '@google-cloud/language';
 import {pinoHttp, logger} from './utils/logging.js';
 
 const app = express();
@@ -26,7 +27,30 @@ app.get('/', async (req, res) => {
   logger.info({logField: 'custom-entry', arbitraryField: 'custom-entry'}); // Example of structured logging
   // Use request-based logger with log correlation
   req.log.info('Child logger with trace Id.'); // https://cloud.google.com/run/docs/logging#correlate-logs
-  res.send('Hello Rayna World!');
+
+   // Imports the Google Cloud client library
+  //  const language = require('@google-cloud/language');
+
+   // Instantiates a client
+   const client = new language.LanguageServiceClient();
+ 
+   // The text to analyze
+   const text = 'Hello, world!';
+ 
+   const document = {
+     content: text,
+     type: 'PLAIN_TEXT',
+   };
+ 
+   // Detects the sentiment of the text
+   const [result] = await client.analyzeSentiment({document: document});
+   const sentiment = result.documentSentiment;
+ 
+   console.log(`Text: ${text}`);
+   console.log(`Sentiment score: ${sentiment.score}`);
+   console.log(`Sentiment magnitude: ${sentiment.magnitude}`);
+
+  res.send(sentiment);
 });
 
 export default app;
