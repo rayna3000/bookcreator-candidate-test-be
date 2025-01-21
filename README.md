@@ -1,44 +1,161 @@
-# Book Creator Backend Engineer Candidate Technical Assessment
+# Cloud Run Template Microservice
 
-The purpose of this test is mainly for us to get an idea of your technical capability. It will also serve as a starting point for discussions about how you think about and communicate the decisions you make when you write code, should you get through to the next stage.
+A template repository for a Cloud Run microservice, written in Node.js. 
 
-## What is the task?
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
 
-Your task is to write and deploy a minimal but interesting service using [Google Cloud's free tier](https://cloud.google.com/free). The only requirements are that you must:
-1. deploy this service to [Cloud Run](https://cloud.google.com/run/docs); and
-2. use one other Google Cloud service from the [free tier list](https://cloud.google.com/free/docs/free-cloud-features#free-tier-usage-limits).
+## Prerequisite
 
-The easiest way to get going on this task will be to sign up for a Google Cloud free trial. This will require you to enter some billing details to confirm your identity. If you would rather not enter your billing details, or you have already used the Google Cloud free trial and your usage is beyond the free tier limits, then please email the person who sent you this test with details of a Google account that you control so that we can provision a project for you.
+* Enable the Cloud Run API via the [console](https://console.cloud.google.com/apis/library/run.googleapis.com?_ga=2.124941642.1555267850.1615248624-203055525.1615245957) or CLI:
 
-This is an intentionally vague requirement - we're excited to see what you come up with. To kick start your thinking, here are some ideas. Feel free to pick one of these if your creative juices aren't flowing today.
+```bash
+gcloud services enable run.googleapis.com
+```
 
-Make an API that can:
-1. Use the [Cloud Vision API face detection](https://cloud.google.com/vision/docs/detecting-faces) to overlay an emoji on a picture containing a face.
-2. Use the [Cloud Natural Language API](https://cloud.google.com/natural-language/docs/analyzing-sentiment) to perform sentiment analysis to encourage us to be more positive in our writing.
-3. Use [Cloud Firestore](https://cloud.google.com/firestore/docs) to make a URL shortener.
-4. Use [Speech-to-text](https://cloud.google.com/speech-to-text/docs) to read a document or book.
+## Features
 
-## What are we looking for?
+* **Express**: Web server framework
+* **Buildpack support** Tooling to build production-ready container images from source code and without a Dockerfile
+* **Dockerfile**: Container build instructions, if needed to replace buildpack for custom build
+* **SIGTERM handler**: Catch termination signal for cleanup before Cloud Run stops the container
+* **Service metadata**: Access service metadata, project Id and region, at runtime
+* **Local development utilities**: Auto-restart with changes and prettify logs
+* **Structured logging w/ Log Correlation** JSON formatted logger, parsable by Cloud Logging, with [automatic correlation of container logs to a request log](https://cloud.google.com/run/docs/logging#correlate-logs).
+* **Unit and System tests** Basic unit and system tests setup for the microservice
 
-We'll use the following rubric to evaluate your submission.
+## Local Development
 
-1. Does the README contain instructions about what the API does, how to use it and what URL to find it at?
-2. Is the API simple and easy-to-use?
-3. Does the deployed service work as described in the README?
-4. Can I build and run the code locally within seconds or minutes of initial checkout?
-5. Did they use Cloud Build to build and deploy to the cloud? (Optional)
-6. Is the code clean, readable and well structured?
-7. Have they thought about testing? (Comprehensive tests are not expected but some consideration of testability would be nice to see.)
+### Cloud Code
 
-## Are there any restrictions?
+This template works with [Cloud Code](https://cloud.google.com/code), an IDE extension
+to let you rapidly iterate, debug, and run code on Kubernetes and Cloud Run.
 
-Not really, go wild! 
-Feel free to add any dependencies you need (although we might ask you to justify your decisions at the interview stage). 
-Use AI coding tools (but be prepared to stand by the code you submit). 
-Spend as much or as little time as you want (we think that you should be able to achieve something cool in an hour or two and you might get penalised if we feel you've over engineered things.)
+Learn how to use Cloud Code for:
 
-## How do I submit the test?
+* Local development - [VSCode](https://cloud.google.com/code/docs/vscode/developing-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/developing-a-cloud-run-service)
 
-Make a PR against this repo.
+* Local debugging - [VSCode](https://cloud.google.com/code/docs/vscode/debugging-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/debugging-a-cloud-run-service)
 
-Feel free to contact the person who sent you this test if you have any questions at all. Good luck!
+* Deploying a Cloud Run service - [VSCode](https://cloud.google.com/code/docs/vscode/deploying-a-cloud-run-service), [IntelliJ](https://cloud.google.com/code/docs/intellij/deploying-a-cloud-run-service)
+* Creating a new application from a custom template (`.template/templates.json` allows for use as an app template) - [VSCode](https://cloud.google.com/code/docs/vscode/create-app-from-custom-template), [IntelliJ](https://cloud.google.com/code/docs/intellij/create-app-from-custom-template)
+
+### CLI tooling
+
+#### Local development
+
+1. Set Project Id:
+    ```bash
+    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
+    ```
+2. Start the server with hot reload:
+    ```bash
+    npm run dev
+    ```
+
+#### Deploying a Cloud Run service
+
+1. Set Project Id:
+    ```bash
+    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
+    ```
+
+1. Enable the Artifact Registry API:
+    ```bash
+    gcloud services enable artifactregistry.googleapis.com
+    ```
+
+1. Create an Artifact Registry repo:
+    ```bash
+    export REPOSITORY="samples"
+    export REGION=us-central1
+    gcloud artifacts repositories create $REPOSITORY --location $REGION --repository-format "docker"
+    ```
+  
+1. Use the gcloud credential helper to authorize Docker to push to your Artifact Registry:
+    ```bash
+    gcloud auth configure-docker
+    ```
+
+2. Build the container using a buildpack:
+    ```bash
+    npm run build
+    ```
+    
+3. Deploy to Cloud Run:
+    ```bash
+    npm run deploy
+    ```
+
+### Run sample tests
+
+1. [Pass credentials via `GOOGLE_APPLICATION_CREDENTIALS` env var](https://cloud.google.com/docs/authentication/production#passing_variable):
+    ```bash
+    export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+    ```
+
+2. Set Project Id:
+    ```bash
+    export GOOGLE_CLOUD_PROJECT=<GCP_PROJECT_ID>
+    ```
+3. Run unit tests
+    ```bash
+    npm run test
+    ```
+
+4. Run system tests
+    ```bash
+    gcloud builds submit \
+        --config test/advance.cloudbuild.yaml \
+        --substitutions 'COMMIT_SHA=manual'
+    ```
+    The Cloud Build configuration file will build and deploy the containerized service
+    to Cloud Run, run tests managed by NPM, then clean up testing resources. This configuration restricts public
+    access to the test service. Therefore, service accounts need to have the permission to issue Id tokens for request authorization:
+    * Enable Cloud Run, Cloud Build, Artifact Registry, and IAM APIs:
+        ```bash
+        gcloud services enable run.googleapis.com cloudbuild.googleapis.com iamcredentials.googleapis.com artifactregistry.googleapis.com
+        ```
+
+    * Set environment variables.
+        ```bash
+        export PROJECT_ID="$(gcloud config get-value project)"
+        export PROJECT_NUMBER="$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')"
+        ```
+
+    * Create an Artifact Registry repo (or use another already created repo):
+        ```bash
+        export REPOSITORY="samples"
+        export REGION=us-central1
+        gcloud artifacts repositories create $REPOSITORY --location $REGION --repository-format "docker"
+        ```
+  
+    * Create service account `token-creator` with `Service Account Token Creator` and `Cloud Run Invoker` roles.
+        ```bash
+        gcloud iam service-accounts create token-creator
+
+        gcloud projects add-iam-policy-binding $PROJECT_ID \
+            --member="serviceAccount:token-creator@$PROJECT_ID.iam.gserviceaccount.com" \
+            --role="roles/iam.serviceAccountTokenCreator"
+        gcloud projects add-iam-policy-binding $PROJECT_ID \
+            --member="serviceAccount:token-creator@$PROJECT_ID.iam.gserviceaccount.com" \
+            --role="roles/run.invoker"
+        ```
+
+    * Add `Service Account Token Creator` role to the Cloud Build service account.
+        ```bash
+        gcloud projects add-iam-policy-binding $PROJECT_ID \
+            --member="serviceAccount:$PROJECT_NUMBER@cloudbuild.gserviceaccount.com" \
+            --role="roles/iam.serviceAccountTokenCreator"
+        ```
+
+## Maintenance & Support
+
+This repo performs basic periodic testing for maintenance. Please use the issue tracker for bug reports, features requests and submitting pull requests.
+
+## Contributions
+
+Please see the [contributing guidelines](CONTRIBUTING.md)
+
+## License
+
+This library is licensed under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
