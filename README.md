@@ -55,7 +55,7 @@ To run this repo, you must have a [Google Cloud Platform account on the free tie
 ```
 npm i
 ```
-- Create a new project with Natural Language API enabled - follow [the Quickstart guide for setting up Natural Language API] up to and including the step:
+- Create a new project with Natural Language API enabled - follow [the Quickstart guide for setting up Natural Language API](https://cloud.google.com/natural-language/docs/setup) up to and including the step:
 ```
 gcloud init
 ```
