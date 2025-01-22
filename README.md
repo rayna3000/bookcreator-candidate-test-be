@@ -59,7 +59,6 @@ npm i
 ```
 gcloud init
 ```
-The above should be run within the folder for this project.
 - Then, run the following command in the terminal in order to authenticate your local project with the Natural Language API:
 ```
 gcloud auth application-default login
