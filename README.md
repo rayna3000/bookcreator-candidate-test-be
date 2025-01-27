@@ -3,6 +3,12 @@ Have you ever been told some news and wondered whether you should react with "Ha
 
 This API allows you to send a POST request with some news, and it uses the Google Natural Language API to respond with either "Happy for you" or "Sorry that happened".
 
+It also does the following:
+- identifies _themes_ within the text, and their _role_ in the statement: "problem", "joy" or "just a thing"
+- saves each submission to a database
+- allows the user to retrieve all previous submissions
+- allows the user to retrieve all themes that have occured across all submissions on the system, and how often they occur as a "problem", "joy" or "just a thing"
+
 See it deployed here: https://raynas-gcp-demo-940535980876.europe-west1.run.app/
 
 This API is inspired by the meme "I ain't reading all that, happy for u tho, or sorry that happened".
@@ -43,7 +49,7 @@ Response:
 ```json
 {
     "reaction": "Sorry that happened!",
-    "message": "Your news have been submitted to our system under the id KsR0GtX6B8mLkbOFWp3Y“
+    "message": "Your news have been submitted to our system under the id KsR0GtX6B8mLkbOFWp3Y"
 }
 ```
 
@@ -107,49 +113,51 @@ Query parameters:
 Response:
 ```json
 {
-    "message": "Successfully retrieved all submissions",
+    "message": "Successfully retrieved themes from all submissions",
     "data": [
         {
-            "news": "I had an amazing pizza!",
-            "mood": "Good",
-            "reaction": "Happy for you!",
-            "themes": [
-                {
-                    "name": "pizza",
-                    "role": "Joy"
-                }
-            ]
+            "name": "family",
+            "occurences": {
+                "asProblem": 0,
+                "asJoy": 4,
+                "asJustAThing": 0
+            }
         },
         {
-            "news": "I had a terrible pizza!",
-            "mood": "Bad",
-            "reaction": "Sorry that happened!",
-            "themes": [
-                {
-                    "name": "pizza",
-                    "role": "Problem"
-                }
-            ]
+            "name": "pizza",
+            "occurences": {
+                "asProblem": 2,
+                "asJoy": 2,
+                "asJustAThing": 2
+            }
         },
         {
-            "news": "I had a pizza at a restaurant",
-            "mood": "Neutral",
-            "reaction": "And how do you feel about that?",
-            "themes": [
-                {
-                    "name": "pizza",
-                    "role": "Just a thing"
-                },
-                {
-                    "name": "restaurant",
-                    "role": "Just a thing"
-                }
-            ]
+            "name": "life",
+            "occurences": {
+                "asProblem": 0,
+                "asJoy": 2,
+                "asJustAThing": 0
+            }
+        },
+        {
+            "name": "joy",
+            "occurences": {
+                "asProblem": 0,
+                "asJoy": 1,
+                "asJustAThing": 0
+            }
+        },
+        {
+            "name": "news",
+            "occurences": {
+                "asProblem": 1,
+                "asJoy": 0,
+                "asJustAThing": 0
+            }
         }
     ]
 }
 ```
-
 
 ## Local setup instructions
 
