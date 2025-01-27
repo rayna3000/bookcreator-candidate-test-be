@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import app from './src/app.js';
-import {logger, initLogCorrelation} from './utils/logging.js';
-import {fetchProjectId} from './utils/metadata.js';
+import {logger, initLogCorrelation} from './src/utils/logging.js';
+import {fetchProjectId} from './src/utils/metadata.js';
 
 /**
  * Initialize app and start Express server

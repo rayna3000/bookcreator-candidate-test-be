@@ -14,11 +14,21 @@
 
 import express from 'express';
 import * as language from '@google-cloud/language';
-import {validateShareNewsRequest} from './validation.js';
-import {generateReactionToNews} from './generateReactionToNews.js';
+import {validateShareNewsRequest} from './middleware/validateNews.js';
+import {handleExceptions} from './middleware/handleExceptions.js'
+import {generateReactionToNews} from './news/generateReactionToNews.js';
+import {pinoHttp, logger} from './utils/logging.js';
+
+import {Firestore} from '@google-cloud/firestore';
+
+const db = new Firestore({
+  projectId: 'YOUR_PROJECT_ID',
+  keyFilename: '/path/to/keyfile.json',
+});
 
 const app = express();
 
+app.use(pinoHttp);
 app.use(express.json());
 
 app.get('/', async (req, res) => {
@@ -27,28 +37,22 @@ app.get('/', async (req, res) => {
   });
 });
 
-app.post('/sharenews', async (req, res) => {
-  try {
-    validateShareNewsRequest(req);
-  } catch (e) {
-    res.statusCode = 400;
-    res.send({
-      message: e.message
-    })
-  }
+app.post('/sharenews', validateShareNewsRequest, async (req, res, next) => {
+
   const client = new language.LanguageServiceClient();
   const newsToReactTo = req.body.news;
   try {
-    const reaction = await generateReactionToNews(newsToReactTo, client);
+    const reaction = await generateReactionToNews(newsToReactTo, client, db);
+
     res.send({
-      message: reaction
+      message: reaction,
+      ...reaction
     })
   } catch (e) {
-    res.statusCode = 500;
-    res.send({
-      message: 'Something went wrong while trying to generate a reaction to your news'
-    })
+    next(e)
   }
 })
+
+app.use(handleExceptions);
 
 export default app;
