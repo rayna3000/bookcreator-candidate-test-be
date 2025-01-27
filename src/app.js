@@ -14,18 +14,13 @@
 
 import express from 'express';
 import * as language from '@google-cloud/language'
-import {validateShareNewsRequest} from './middleware/validateNews.js'
+import {validateShareNewsRequest} from './middleware/validateShareNewsRequest.js'
+import {validateGetThemesFilter} from './middleware/validateGetThemesRequest.js'
 import {handleExceptions} from './middleware/handleExceptions.js'
 import {submitNews} from './news/submitNews.js'
 import {pinoHttp, logger} from './utils/logging.js'
 import {getDbConnection} from './utils/dbConnection.js'
-
-// import {Firestore} from '@google-cloud/firestore';
-
-// const db = new Firestore({
-//   projectId: 'YOUR_PROJECT_ID',
-//   keyFilename: '/path/to/keyfile.json',
-// });
+import {getThemes} from './news/themes/getThemes.js';
 
 const app = express();
 
@@ -34,7 +29,7 @@ app.use(express.json());
 
 app.get('/', async (req, res) => {
   res.send({
-    message: 'Welcome to the "Happy for you" or "Sorry that happened" API! Feel free to share your happy or sad news using the POST /sharenews endpoint under the JSON property "news".'
+    message: 'Welcome to the Happy for you or Sorry that happened API! Feel free to share your happy or sad news using the POST /sharenews endpoint under the JSON property "news".'
   })
 })
 
@@ -44,18 +39,36 @@ app.post('/sharenews', validateShareNewsRequest, async (req, res, next) => {
   const db = await getDbConnection()
   const newsToReactTo = req.body.news
   try {
-    const reaction = await submitNews(newsToReactTo, client, db)
-
-    res.send({
-      message: reaction,
-      ...reaction
-    })
+    const responseBody = await submitNews(newsToReactTo, client, db)
+    res.send(responseBody)
   } catch (e) {
-    // next(e)
-    res.send(e.message)
+    next(e)
   }
 })
 
-// app.use(handleExceptions)
+app.get('/news', async (req, res, next) => {
+  const db = await getDbConnection()
+  try {
+    const responseBody = await getNews(db)
+    res.send(responseBody)
+  } catch (e) {
+    next(e)
+  }
+})
+
+app.get('/themes', validateGetThemesFilter, async (req, res, next) => {
+  const db = await getDbConnection()
+  try {
+    const responseBody = await getThemes(db)
+    res.send(responseBody)
+  } catch (e) {
+    next(e)
+  }
+})
+
+app.use(handleExceptions)
+app.use((err, req, res, next) => {
+  res.send({message: err.message})
+})
 
 export default app

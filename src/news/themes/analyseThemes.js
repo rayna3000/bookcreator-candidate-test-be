@@ -3,7 +3,7 @@
  * @readonly
  * @enum string
  */
-const Role = Object.freeze({
+export const Role = Object.freeze({
     PROBLEM: 'Problem',
     JOY: 'Joy',
     JUST_A_THING: 'Just a thing'
