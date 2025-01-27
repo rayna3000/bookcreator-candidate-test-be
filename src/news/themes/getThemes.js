@@ -18,14 +18,14 @@ export const getThemes = async (db, orderBy) => {
         (themesSoFar, currentValue) => themesSoFar.concat(currentValue.themes),
         []
     )
-    const allThemesWithCounts = removeDuplicatesAndAddCounts(allThemesWithDuplicates)
+    let allThemesWithCounts = removeDuplicatesAndAddCounts(allThemesWithDuplicates)
 
-    if(!orderBy) {
-        return allThemesWithCounts
-    } else {
-        const orderedThemes = orderThemes(allThemesWithCounts, orderBy)
-        console.log('after sort', orderedThemes)
-        return orderedThemes
+    if(orderBy) {
+        allThemesWithCounts = orderThemes(allThemesWithCounts, orderBy)
+    }
+    return {
+        message: "Successfully retrieved themes from all submissions",
+        data: allThemesWithCounts
     }
 }
 
@@ -37,10 +37,10 @@ const removeDuplicatesAndAddCounts = (themesWithDuplicates) => {
             asJoy: theme.role === Role.JOY ? 1 : 0,
             asJustAThing: theme.role === Role.JUST_A_THING ? 1 : 0
         }
-        const existingEntry = themesWithCounts.get(theme.name.toLowercase)
+        const existingEntry = themesWithCounts.get(theme.name)
         if(existingEntry) {
             themesWithCounts.set(theme.name, {
-                name: theme.name.toLowercase,
+                name: theme.name,
                 occurences: {
                     asProblem: existingEntry.occurences.asProblem + occurenceIncrements.asProblem,
                     asJoy: existingEntry.occurences.asJoy + occurenceIncrements.asJoy,
@@ -70,9 +70,5 @@ orderFunctionMap.set(ThemesOrder.BIGGEST_PROBLEM, sortByBiggestProblem)
 orderFunctionMap.set(ThemesOrder.BIGGEST_JOY, sortByBiggestJoy)
 
 const orderThemes = (themes, orderBy) => {
-    console.log('before sort', themes)
-    // return themes.sort(orderFunctionMap.get(orderBy))
-    return themes.sort((firstTheme, secondTheme) => {
-        return secondTheme.occurences.asJoy - firstTheme.occurences.asJoy
-    })
+    return themes.sort(orderFunctionMap.get(orderBy))
 }

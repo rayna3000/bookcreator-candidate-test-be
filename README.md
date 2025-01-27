@@ -24,6 +24,8 @@ Response:
 ```
 
 ### POST /sharenews
+- Submits the news to the system (see `GET /news` for details on what is submitted)
+- Responds depending on the mood of the news with either "Happy for you!", "Sorry that happened", or "And how do you feel about that?"
 
 Query parameters: none
 
@@ -40,9 +42,114 @@ Example request:
 Response:
 ```json
 {
-    "message": "Sorry that happened!"
+    "reaction": "Sorry that happened!",
+    "message": "Your news have been submitted to our system under the id KsR0GtX6B8mLkbOFWp3Y“
 }
 ```
+
+### GET /news
+Retrieves all the news that have been submitted to the system.
+
+Query parameters: none
+
+Response:
+```json
+{
+    "message": "Successfully retrieved all submissions",
+    "data": [
+        {
+            "news": "I had an amazing pizza!",
+            "mood": "Good",
+            "reaction": "Happy for you!",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Joy"
+                }
+            ]
+        },
+        {
+            "news": "I had a terrible pizza!",
+            "mood": "Bad",
+            "reaction": "Sorry that happened!",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Problem"
+                }
+            ]
+        },
+        {
+            "news": "I had a pizza at a restaurant",
+            "mood": "Neutral",
+            "reaction": "And how do you feel about that?",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Just a thing"
+                },
+                {
+                    "name": "restaurant",
+                    "role": "Just a thing"
+                }
+            ]
+        }
+    ]
+}
+```
+
+### GET /themes
+Retrieves all the themes that exist in the submissions on the system, along with counts of how often they have occured as a `Joy`, `Problem` or `Just a thing`.
+
+Query parameters: 
+ - `orderBy` - can be either `biggestProblem` or `biggestJoy`
+
+Response:
+```json
+{
+    "message": "Successfully retrieved all submissions",
+    "data": [
+        {
+            "news": "I had an amazing pizza!",
+            "mood": "Good",
+            "reaction": "Happy for you!",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Joy"
+                }
+            ]
+        },
+        {
+            "news": "I had a terrible pizza!",
+            "mood": "Bad",
+            "reaction": "Sorry that happened!",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Problem"
+                }
+            ]
+        },
+        {
+            "news": "I had a pizza at a restaurant",
+            "mood": "Neutral",
+            "reaction": "And how do you feel about that?",
+            "themes": [
+                {
+                    "name": "pizza",
+                    "role": "Just a thing"
+                },
+                {
+                    "name": "restaurant",
+                    "role": "Just a thing"
+                }
+            ]
+        }
+    ]
+}
+```
+
 
 ## Local setup instructions
 
