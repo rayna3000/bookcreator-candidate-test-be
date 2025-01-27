@@ -178,7 +178,7 @@ gcloud init
 ```
 gcloud auth application-default login
 ```
-- Then, [set up a Firestore database for your project following this guide](https://cloud.google.com/firestore/docs/create-database-server-client-library). The authentication step from earlier should be enough to connect to your database if you are using Linux or Mac (see the file `utils/dbConnection.js`). 
+- Then, [set up a Firestore database for your project following this guide](https://cloud.google.com/firestore/docs/create-database-server-client-library). The authentication step from earlier should be enough to authenticate to your database. 
 
 ### Running
 To run the local server, simply:
