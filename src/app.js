@@ -69,8 +69,5 @@ app.get('/themes', validateGetThemesFilter, async (req, res, next) => {
 })
 
 app.use(handleExceptions)
-app.use((err, req, res, next) => {
-  res.send({message: err.message})
-})
 
 export default app
