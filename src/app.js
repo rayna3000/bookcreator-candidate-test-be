@@ -21,6 +21,7 @@ import {submitNews} from './news/submitNews.js'
 import {pinoHttp, logger} from './utils/logging.js'
 import {getDbConnection} from './utils/dbConnection.js'
 import {getThemes} from './news/themes/getThemes.js';
+import {getNews} from './news/getNews.js'
 
 const app = express();
 
@@ -57,9 +58,10 @@ app.get('/news', async (req, res, next) => {
 })
 
 app.get('/themes', validateGetThemesFilter, async (req, res, next) => {
+  const orderBy = 'orderBy' in req.query ? req.query.orderBy : undefined
   const db = await getDbConnection()
   try {
-    const responseBody = await getThemes(db)
+    const responseBody = await getThemes(db, orderBy)
     res.send(responseBody)
   } catch (e) {
     next(e)
