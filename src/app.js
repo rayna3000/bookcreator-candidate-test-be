@@ -16,7 +16,7 @@ import express from 'express';
 import * as language from '@google-cloud/language'
 import {validateShareNewsRequest} from './middleware/validateNews.js'
 import {handleExceptions} from './middleware/handleExceptions.js'
-import {generateReactionToNews} from './news/generateReactionToNews.js'
+import {submitNews} from './news/submitNews.js'
 import {pinoHttp, logger} from './utils/logging.js'
 import {getDbConnection} from './utils/dbConnection.js'
 
@@ -44,7 +44,7 @@ app.post('/sharenews', validateShareNewsRequest, async (req, res, next) => {
   const db = await getDbConnection()
   const newsToReactTo = req.body.news
   try {
-    const reaction = await generateReactionToNews(newsToReactTo, client, db)
+    const reaction = await submitNews(newsToReactTo, client, db)
 
     res.send({
       message: reaction,
