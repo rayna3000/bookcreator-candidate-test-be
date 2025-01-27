@@ -13,18 +13,19 @@
 // limitations under the License.
 
 import express from 'express';
-import * as language from '@google-cloud/language';
-import {validateShareNewsRequest} from './middleware/validateNews.js';
+import * as language from '@google-cloud/language'
+import {validateShareNewsRequest} from './middleware/validateNews.js'
 import {handleExceptions} from './middleware/handleExceptions.js'
-import {generateReactionToNews} from './news/generateReactionToNews.js';
-import {pinoHttp, logger} from './utils/logging.js';
+import {generateReactionToNews} from './news/generateReactionToNews.js'
+import {pinoHttp, logger} from './utils/logging.js'
+import {getDbConnection} from './utils/dbConnection.js'
 
-import {Firestore} from '@google-cloud/firestore';
+// import {Firestore} from '@google-cloud/firestore';
 
-const db = new Firestore({
-  projectId: 'YOUR_PROJECT_ID',
-  keyFilename: '/path/to/keyfile.json',
-});
+// const db = new Firestore({
+//   projectId: 'YOUR_PROJECT_ID',
+//   keyFilename: '/path/to/keyfile.json',
+// });
 
 const app = express();
 
@@ -34,25 +35,27 @@ app.use(express.json());
 app.get('/', async (req, res) => {
   res.send({
     message: 'Welcome to the "Happy for you" or "Sorry that happened" API! Feel free to share your happy or sad news using the POST /sharenews endpoint under the JSON property "news".'
-  });
-});
+  })
+})
 
 app.post('/sharenews', validateShareNewsRequest, async (req, res, next) => {
 
-  const client = new language.LanguageServiceClient();
-  const newsToReactTo = req.body.news;
+  const client = new language.LanguageServiceClient()
+  const db = await getDbConnection()
+  const newsToReactTo = req.body.news
   try {
-    const reaction = await generateReactionToNews(newsToReactTo, client, db);
+    const reaction = await generateReactionToNews(newsToReactTo, client, db)
 
     res.send({
       message: reaction,
       ...reaction
     })
   } catch (e) {
-    next(e)
+    // next(e)
+    res.send(e.message)
   }
 })
 
-app.use(handleExceptions);
+// app.use(handleExceptions)
 
-export default app;
+export default app

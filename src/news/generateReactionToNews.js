@@ -1,5 +1,21 @@
+/**
+ * Enum for moods
+ * @readonly
+ * @enum string
+ */
+const Mood = Object.freeze({
+    GOOD: 'Good',
+    BAD: 'Bad',
+    NEUTRAL: 'Neutral'
+});
+
+const MoodReaction = new Map([
+    [Mood.GOOD, 'Happy for you!'],
+    [Mood.BAD, 'Sorry that happened!'],
+    [Mood.NEUTRAL, 'And how do you feel about that?']
+])
+
 export const generateReactionToNews = async (news, languageClient, db) => {
- 
     const document = {
       content: news,
       type: 'PLAIN_TEXT',
@@ -8,27 +24,25 @@ export const generateReactionToNews = async (news, languageClient, db) => {
     const [entities] = await languageClient.analyzeEntities({document: document});
     const [entitySentiments] = await languageClient.analyzeEntitySentiment({document: document});
     // const [syntax] = await languageClient.analyzeSyntax({document: document});
-    const [classification] = await languageClient.classifyText({document: document});
+    // const [classification] = await languageClient.classifyText({document: document});
 
     const sentimentScore = sentiment.documentSentiment.score;
-
-    const allData = {
-        sentiment, entities, entitySentiments, classification
-    }
+    const mood = classifyMood(sentimentScore)
     
-    if(sentimentScore > 0) {
-        allData.message = 'Happy for you!'
-    } else if (sentimentScore < 0) {
-        allData.message = 'Sorry that happened!'
-    } else {
-        allData.message = 'And how do you feel about that?'
+    const allData = {
+        sentiment, 
+        entities, 
+        entitySentiments, 
+        // classification
     }
+    allData.message = getMoodReaction(mood)
+    
 
     const dbEntry = {
         news,
-        sentiment,
-        entitySentiments,
-        classification,
+        mood,
+        // entitySentiments,
+        // classification,
         reaction: allData.message
     }
 
@@ -38,3 +52,16 @@ export const generateReactionToNews = async (news, languageClient, db) => {
 
     return allData
 }
+
+const classifyMood = (sentimentScore) => {
+    if(sentimentScore > 0) {
+        return Mood.GOOD
+    } else if (sentimentScore < 0) {
+        return Mood.BAD
+    } else {
+        return Mood.NEUTRAL
+    }
+}
+
+const getMoodReaction = mood => MoodReaction.get(mood)
+
